@@ -120,15 +120,13 @@ s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)
 }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
 
-fbq('init','
-1727954128132041');
+fbq('init','1727954128132041');
 fbq('track','PageView');
 </script>
 
 <noscript>
 <img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=
-1727954128132041&ev=PageView&noscript=1"/>
+src="https://www.facebook.com/tr?id=1727954128132041&ev=PageView&noscript=1"/>
 </noscript>
 
 <!-- CONVERSION API -->
@@ -137,6 +135,7 @@ const ACCESS_TOKEN = "EAAqHRZA7ZCtMYBQtcNqdjjNjZABJueBfBCMGgsQmPZAGbvmaKpYmtSZCS
 const PIXEL_ID = "1343819950373428";
 
 function sendCAPIEvent(eventName){
+  const eventId = eventName + "_" + Date.now();
   fetch(`https://graph.facebook.com/v18.0/${PIXEL_ID}/events?access_token=${ACCESS_TOKEN}`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -144,6 +143,7 @@ function sendCAPIEvent(eventName){
       data: [{
         event_name: eventName,
         event_time: Math.floor(Date.now()/1000),
+        event_id: eventId,
         action_source: "website",
         user_data: {
           client_user_agent: navigator.userAgent
@@ -153,7 +153,7 @@ function sendCAPIEvent(eventName){
   });
 }
 
-// Auto PageView CAPI
+// PageView CAPI
 sendCAPIEvent("PageView");
 </script>
 
@@ -175,7 +175,7 @@ sendCAPIEvent("PageView");
   <div class="urgent">⏳ Join Before Match Starts</div>
 
   <div class="button">
-    <a href="https://t.me/+MqGWTIoYgqJhZjk1" onclick="fbq('track','Lead'); sendCAPIEvent('Lead');" class="btn">
+    <a href="https://t.me/+MqGWTIoYgqJhZjk1" id="joinBtn" class="btn">
       Join Telegram Channel <i class="fa-brands fa-telegram"></i>
     </a>
   </div>
@@ -189,7 +189,7 @@ sendCAPIEvent("PageView");
   </div>
 
   <div class="button">
-    <a href="https://t.me/+MqGWTIoYgqJhZjk1" onclick="fbq('track','Lead'); sendCAPIEvent('Lead');" class="btn">
+    <a href="https://t.me/+MqGWTIoYgqJhZjk1" id="joinBtn2" class="btn">
       SUBSCRIBE FOR FREE <i class="fa-brands fa-telegram"></i>
     </a>
   </div>
@@ -202,6 +202,7 @@ sendCAPIEvent("PageView");
 
 </div>
 
+<!-- MEMBER COUNTER -->
 <script>
 const target = 60000;
 const duration = 2000;
@@ -216,6 +217,49 @@ function animate(t){
   if(count < target) requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
+</script>
+
+<!-- ADVANCED ANTI-BOT + SINGLE CLICK TRACK -->
+<script>
+let leadTracked = false;
+let pageLoadedAt = Date.now();
+
+// Detect bots
+function isBot(){
+  return (
+    navigator.webdriver ||
+    /HeadlessChrome|bot|crawler|spider|crawling/i.test(navigator.userAgent)
+  );
+}
+
+// Human check (must stay on page)
+function isHuman(){
+  let timeOnPage = Date.now() - pageLoadedAt;
+  return timeOnPage > 2500; 
+}
+
+function trackLeadOnce(){
+  if(isBot()){
+    console.warn("Bot blocked");
+    return;
+  }
+
+  if(!isHuman()){
+    console.warn("Fast spam click blocked");
+    return;
+  }
+
+  if(leadTracked) return;
+  leadTracked = true;
+
+  fbq('track','Lead');
+  sendCAPIEvent('Lead');
+
+  console.log("Real Human Lead tracked");
+}
+
+document.getElementById("joinBtn").addEventListener("click", trackLeadOnce);
+document.getElementById("joinBtn2").addEventListener("click", trackLeadOnce);
 </script>
 
 </body>
