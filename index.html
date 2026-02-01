@@ -129,34 +129,6 @@ fbq('track','PageView');
 src="https://www.facebook.com/tr?id=1727954128132041&ev=PageView&noscript=1"/>
 </noscript>
 
-<!-- CONVERSION API -->
-<script>
-const ACCESS_TOKEN = "EAAqHRZA7ZCtMYBQtcNqdjjNjZABJueBfBCMGgsQmPZAGbvmaKpYmtSZCSDL3uX1lxVDnZB447tsZBg3CiVmZCwZBejxWbZCJNyRqUPVeisGg6Uklw9L53OfrRUDqJejqu9YZCGZCpnVhvxYqZCuhnO95rdderzDTFqdtgotDXTWMltFkSH8sYQWGzX9W1zPLROtXYle0cEwZDZD";
-const PIXEL_ID = "1727954128132041";
-
-function sendCAPIEvent(eventName){
-  const eventId = eventName + "_" + Date.now();
-  fetch(`https://graph.facebook.com/v18.0/${PIXEL_ID}/events?access_token=${ACCESS_TOKEN}`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      data: [{
-        event_name: eventName,
-        event_time: Math.floor(Date.now()/1000),
-        event_id: eventId,
-        action_source: "website",
-        user_data: {
-          client_user_agent: navigator.userAgent
-        }
-      }]
-    })
-  });
-}
-
-// PageView CAPI
-sendCAPIEvent("PageView");
-</script>
-
 </head>
 
 <body>
@@ -219,12 +191,11 @@ function animate(t){
 requestAnimationFrame(animate);
 </script>
 
-<!-- ADVANCED ANTI-BOT + SINGLE CLICK TRACK -->
+<!-- ANTI-BOT + SINGLE CLICK LEAD -->
 <script>
 let leadTracked = false;
 let pageLoadedAt = Date.now();
 
-// Detect bots
 function isBot(){
   return (
     navigator.webdriver ||
@@ -232,30 +203,17 @@ function isBot(){
   );
 }
 
-// Human check (must stay on page)
 function isHuman(){
-  let timeOnPage = Date.now() - pageLoadedAt;
-  return timeOnPage > 2500; 
+  return (Date.now() - pageLoadedAt) > 2500;
 }
 
 function trackLeadOnce(){
-  if(isBot()){
-    console.warn("Bot blocked");
-    return;
-  }
-
-  if(!isHuman()){
-    console.warn("Fast spam click blocked");
-    return;
-  }
-
+  if(isBot()) return;
+  if(!isHuman()) return;
   if(leadTracked) return;
+
   leadTracked = true;
-
   fbq('track','Lead');
-  sendCAPIEvent('Lead');
-
-  console.log("Real Human Lead tracked");
 }
 
 document.getElementById("joinBtn").addEventListener("click", trackLeadOnce);
